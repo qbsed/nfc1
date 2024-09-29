@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .container > * {
+      margin: 5px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      height: 30px;
+      margin-bottom: 10px;
+      margin-top: 20px;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin-right: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #3e8e41;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      display: none;
+      animation: fadeOut 2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    .options {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .options > * {
+      margin-right: 20px;
+    }
+
+    #text-input {
+      align-self: flex-start;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>酷狗音乐（省流版）</h1>
+    <input type="text" id="url-input" onkeyup="generateLink()" placeholder="请输入分享复制的文案or需要转换的URL">
+    <div class="options">
+      <div>
+        <label>跳转标题</label>
+        <input type="checkbox" id="text-switch" onchange="updateTextInput()">
+      </div>
+      <div>
+        <label>不选省流</label>
+        <input type="checkbox" id="protocol-switch" onchange="generateLink()">
+      </div>
+      <div>
+        <label>苹果专用</label>
+        <input type="checkbox" id="apple-switch" onchange="updateProtocolSwitch()">
+      </div>
+      <div id="text-input" style="display: none;">
+        <label>请输入需要显示的标题：</label>
+        <input type="text" id="title-input" onkeyup="generateLink()" placeholder="贴纸字节小/ios不显示勿填">
+      </div>
+    </div>
+    <br>
+    <div id="kugou-link"></div>
+    <br>
+    <div>
+      <button class="button" id="copy-button" onclick="copyLink()">复制</button>
+    </div>
+    <br><br>
+    <div class="success-message" id="success-message">链接已复制！</div>
+  </div>
+
+  <script>
+    function extractUrl(input) {
+      var pattern = /(https?:\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?)/gi;
+      var match = pattern.exec(input);
+      if (match) {
+        return match[1];
+      }
+      return "";
+    }
+
+    function generateLink() {
+      var urlInput = document.getElementById("url-input").value.trim();
+      var url = extractUrl(urlInput);
+      if (url === "") {
+        document.getElementById("kugou-link").innerHTML = "";
+        return;
+      }
+      var protocolSwitch = document.getElementById("protocol-switch");
+      var includeProtocol = protocolSwitch ? protocolSwitch.checked : false;
+      var appleSwitch = document.getElementById("apple-switch");
+      var includeApple = appleSwitch ? appleSwitch.checked : false;
+      var protocol = includeProtocol ? (includeApple ? "kugouurl://" : "kugou://") : "kugou://";
+      var title = getTitle();
+      var jsonStr = '{"cmd":303,"jsonStr":{"title":"' + title.replace(/"/g, '\\"') + '","url":"' + (includeProtocol ? url : url.replace(/(^\w+:|^)\/\//, '')) + '"}}';
+      var kugouLink = protocol + 'start.weixin?' + jsonStr;
+      document.getElementById("kugou-link").innerHTML = "<div>生成的链接为：</div><div style='word-break: break-all;'>" + kugouLink + "</div>";
+    }
+
+    function getTitle() {
+      var titleInput = document.getElementById("title-input");
+      return titleInput ? titleInput.value : "";
+    }
+
+    function copyLink() {
+      var output = document.getElementById("kugou-link");
+      var tempInput = document.createElement("input");
+      tempInput.value = output.lastChild.innerHTML; // 只复制最后一个<div>元素中的文本内容
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      var copyButton = document.getElementById("copy-button");
+      copyButton.innerHTML = "清空";
+      copyButton.onclick = clearInput;
+    }
+
+    function clearInput() {
+      var urlInput = document.getElementById("url-input");
+      urlInput.value = "";
+
+      var copyButton = document.getElementById("copy-button");
+      copyButton.innerHTML = "复制";
+      copyButton.onclick = copyLink;
+    }
+
+    function updateTextInput() {
+      var textInput = document.getElementById("text-input");
+      var show = document.getElementById("text-switch").checked;
+      if (show) {
+        textInput.style.display = "block";
+      } else {
+        textInput.style.display = "none";
+        document.getElementById("title-input").value = ""; // 清空标题输入框的值
+      }
+      generateLink();
+    }
+
+    function updateProtocolSwitch() {
+      var appleSwitch = document.getElementById("apple-switch");
+      var protocolSwitch = document.getElementById("protocol-switch");
+      if (appleSwitch && protocolSwitch) {
+        if (appleSwitch.checked) {
+          protocolSwitch.checked = true; // 当勾选苹果用户时，自动勾选包含协议
+        } else {
+          protocolSwitch.checked = false; // 取消勾选苹果用户时，取消包含协议
+        }
+      }
+      generateLink();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updateButton();
+    });
+  </script>
+</body>
+</html>

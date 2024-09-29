@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      height: 30px;
+      margin-bottom: 10px;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 100px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin-right: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #3e8e41;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      display: none;
+      animation: fadeOut 2s;
+    }
+
+    input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      display: inline-block;
+      vertical-align: middle;
+      width: 16px;
+      height: 16px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: transparent;
+    }
+
+    input[type="checkbox"]:checked::before {
+      content: "\2714";
+      display: block;
+      text-align: center;
+      font-size: 14px;
+      line-height: 14px;
+      height: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>QQ音乐-网页</h2>
+    <input type="text" id="input" placeholder="请输入分享的文案‖最终代码也会显示在这">
+    <br>
+    <button class="button" id="cycle-button" onclick="cycleButton()">生成链接</button>
+    <br>
+    <span class="success-message" id="success-message">苹果用户请手动全选复制！</span>
+    <br>
+    <input type="checkbox" id="encode-checkbox" checked>
+    <label for="encode-checkbox">是否编码</label>
+	
+  </div>
+
+  <script>
+    var buttonIndex = 0;
+    var buttonActions = [generateLink, copyLink, clearInput];
+    var encodeCheckbox = document.getElementById("encode-checkbox");
+
+    function generateLink() {
+      var inputLink = document.getElementById("input").value;
+      if (inputLink.trim() === "") {
+        return;
+      }
+      var linkB;
+      if (inputLink.startsWith("https://") || inputLink.startsWith("http://")) {
+        linkB = inputLink;
+      } else {
+        linkB = inputLink.match(/https:\/\/.+?(?=@)/)[0];
+      }
+      var encodedLinkB = encodeCheckbox.checked ? encodeURIComponent(JSON.stringify({ url: linkB, action: "play" })) : JSON.stringify({ url: linkB, action: "play" });
+      var linkD = "qqmusic://qq.com/ui/openUrl?p=";
+      var linkE = linkD + encodedLinkB;
+      document.getElementById("input").value = linkE;
+    }
+
+    function copyLink() {
+      var output = document.getElementById("input");
+      output.select();
+      document.execCommand("copy");
+      document.getElementById("success-message").style.display = "block";
+      setTimeout(function () {
+        document.getElementById("success-message").style.display = "none";
+      }, 3000);
+    }
+
+    function clearInput() {
+      document.getElementById("input").value = "";
+    }
+
+    function cycleButton() {
+      buttonActions[buttonIndex]();
+      if (buttonIndex < buttonActions.length - 1) {
+        buttonIndex++;
+      } else {
+        buttonIndex = 0;
+      }
+      updateButton();
+    }
+
+    function updateButton() {
+      var cycleButton = document.getElementById("cycle-button");
+
+      switch (buttonIndex) {
+        case 0:
+          cycleButton.innerHTML = "生成链接";
+          break;
+        case 1:
+          cycleButton.innerHTML = "复制链接";
+          break;
+        case 2:
+          cycleButton.innerHTML = "清空输入";
+          break;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updateButton();
+    });
+  </script>
+</body>
+</html>

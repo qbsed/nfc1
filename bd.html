@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-size: 80px; /* 调整字体大小 */
+      margin-top: 100px; /* 调整整体位置 */
+    }
+    .container {
+      text-align: center;
+      margin-top: 100px;
+      transition: margin-top 0.5s;
+    }
+    .generated-link {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 1s;
+    }
+    .generated-link.show {
+      display: block;
+    }
+    .copy-button {
+      margin-top: 10px;
+    }
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      animation: fadeOut 2s;
+    }
+
+    input[type="text"] {
+      font-size: 24px; /* 调整输入框字体大小 */
+      padding: 10px; /* 调整输入框内边距 */
+      border: 1px solid #ccc; /* 修改输入框边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      width: 80%; /* 调整输入框宽度 */
+    }
+
+    button {
+      font-size: 24px; /* 调整按钮字体大小 */
+      padding: 4px 10px; /* 调整按钮内边距 */
+      background-color: #f8f8f8; /* 修改按钮背景颜色 */
+      border: 1px solid #ccc; /* 修改按钮边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 20px; /* 在小屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 300px; /* 在小屏幕上进一步调整元素位置 */
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+      body {
+        font-size: 22px; /* 在中等屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 120px; /* 在中等屏幕上进一步调整元素位置 */
+      }
+    }
+  </style>
+  <script>
+    function generateLink() {
+      var inputStr = document.getElementById('inputBox').value;
+
+      if (inputStr.trim() === '') {
+        // 如果输入框为空，则不进行链接生成
+        return;
+      }
+
+      var idIndex = inputStr.indexOf('mvId=');
+      if (idIndex == -1) {
+        idIndex = inputStr.indexOf('musicId=');
+        if (idIndex != -1) {
+          idIndex += 8; // musicId=是8个字符
+        }
+      } else {
+        idIndex += 5; // mvId=是5个字符
+      }
+
+      var id = '';
+      if (idIndex != -1) {
+        id = inputStr.substring(idIndex, inputStr.indexOf('&', idIndex));
+      }
+
+      var outputStr =
+        'bodian.kuwo.cn://play?pageName=playMusic&opusId=0&sDesc=openApp&sType=1&sId=' +
+        id +
+        '&music=' +
+        id;
+
+      document.getElementById('outputBox').value = outputStr;
+      document.querySelector('.container').style.marginTop = '20px';
+      document.getElementById('generated-link').classList.add('show');
+      document.getElementById('success-message').style.display = 'block';
+
+      var tempInput = document.createElement('input');
+      tempInput.value = outputStr;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      setTimeout(function () {
+        document.getElementById('success-message').style.display = 'none';
+      }, 3000);
+    }
+
+    function clearInput() {
+      document.getElementById('inputBox').value = '';
+      document.getElementById('outputBox').value = '';
+      document.querySelector('.container').style.marginTop = '200px';
+      document.getElementById('generated-link').classList.remove('show');
+      document.getElementById('success-message').style.display = 'none';
+    }
+
+    function copyOutput() {
+      var outputLink = document.getElementById('outputBox').value;
+      var tempInput = document.createElement('input');
+      tempInput.value = outputLink;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+    }
+  </script>
+</head>
+<body onclick="generateLink()">
+  <div class="container">
+    <h2>波点音乐</h2>
+    
+    <input type="text" id="inputBox" placeholder="请整段输入分享分享的链接">
+    <br>
+    <button onclick="clearInput()">清空</button>
+  </div>
+
+  <div id="generated-link" class="generated-link">
+    <p>生成的链接为：</p>
+    <input type="text" id="outputBox" readonly>
+    <button class="copy-button" onclick="copyOutput()">手动复制</button>
+    <p id="success-message" class="success-message" style="display: none;">没有自动复制的寄几手动复制！</p>
+  </div>
+</body>
+</html>
+

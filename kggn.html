@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .container > * {
+      margin: 5px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      height: 30px;
+      margin: 10px 0;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin-right: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #3e8e41;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      display: none;
+      animation: fadeOut 2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    .options {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .options > * {
+      margin-right: 20px;
+    }
+
+    #filename-input {
+      align-self: flex-start;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <h1>酷狗音乐&概念版</h1>
+        <input type="text" id="filename-input" placeholder="请输入显示标题-换行 例如：王心凌-爱你">
+        <input type="text" id="url-input" placeholder="请输入酷狗概念版复制来的链接后等待加载..">
+        <div class="options">
+            <label for="mode-switch">默认输出为安卓</label>
+            <input type="checkbox" id="mode-switch" checked onchange="generateLink()"> 苹果请取消勾选
+        </div>
+        <div>
+            <button class="button" onclick="copyLink()">复制</button>
+            <button class="button" onclick="clearInputs()">清空</button>
+			<div id="kugou-link"></div>
+            <span id="copy-tip" style="display: none; color: red;">苹果手动复制啊 系统这么封闭 ┗|｀O′|┛ </span>
+        </div>
+    </div>
+
+  <script>
+    async function extractUrl(input) {
+      var pattern = /(https?:\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?)/gi;
+      var match = pattern.exec(input);
+      if (match) {
+        var url = match[1];
+        // Call API to parse URL
+        var response = await fetch(`https://res.abeim.cn/api-dwz_longurl?url=${encodeURIComponent(url)}`);
+        var data = await response.json();
+        if (data.code === 200 && data.long_url) {
+          var destinationUrl = data.long_url;
+          var urlParams = new URL(destinationUrl);
+          var hash = urlParams.searchParams.get('hash');
+          var albumId = urlParams.searchParams.get('album_id');
+          var albumAudioId = urlParams.searchParams.get('album_audio_id');
+          return { hash, album_id: albumId, album_audio_id: albumAudioId };
+        }
+      }
+      return null;
+    }
+    
+    function getFilename() {
+      var filenameInput = document.getElementById("filename-input");
+      return filenameInput ? filenameInput.value.trim() : "";
+    }
+    
+    async function generateLink() {
+      var urlInput = document.getElementById("url-input").value.trim();
+      var urlData = await extractUrl(urlInput);
+      if (!urlData) {
+        document.getElementById("kugou-link").innerHTML = "";
+        return;
+      }
+      var filename = getFilename();
+      var modeSwitch = document.getElementById("mode-switch");
+      var isAndroid = modeSwitch ? modeSwitch.checked : false;
+    
+      var cmd = isAndroid ? 103301 : 103301;
+      var jsonStr = isAndroid
+        ? `{"cmd":${cmd},"jsonStr":{"filename":"${filename}","hash":"${urlData.hash}"}}`
+        : `{"cmd":${cmd},"jsonStr":{"filename":"${filename}","filesize":3,"hash":"${urlData.hash}","bitrate":1,"extname":"mp3","duration":2,"isplay":1,"action":1,"album_id":"${urlData.album_id}","album_audio_id":"${urlData.album_audio_id}"}}`;
+    
+      var protocol = isAndroid ? "kugouyouth://start.weixin?" : "kugouyouth://youth.start.weixin?";
+      var kugouLink = protocol + jsonStr;
+      document.getElementById("kugou-link").innerHTML = "<div style='word-break: break-all;'>" + kugouLink + "</div>";
+    }
+    
+    // 在用户输入时立即生成链接
+    document.getElementById("url-input").addEventListener("input", generateLink);
+    
+    function copyLink() {
+      var output = document.getElementById("kugou-link");
+      var kugouLink = output.lastChild.textContent; // 获取生成的链接部分而不包括提示字符
+      var tempInput = document.createElement("input");
+      tempInput.value = kugouLink;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      document.getElementById("success-message").style.display = "block";
+      setTimeout(function () {
+        document.getElementById("success-message").style.display = "none";
+      }, 4000);
+    }
+    function clearInputs() {
+      document.getElementById("filename-input").value = "";
+      document.getElementById("url-input").value = "";
+      document.getElementById("kugou-link").innerHTML = ""; 
+    }
+
+    function copyLink() {
+        var copyText = document.getElementById("kugou-link").innerText;
+        var copyTip = document.getElementById("copy-tip");
+        
+        // 创建一个隐藏的 textarea 元素来容纳链接
+        var tempTextArea = document.createElement("textarea");
+        tempTextArea.value = copyText;
+        document.body.appendChild(tempTextArea);
+    
+        // 选择链接内容并复制
+        tempTextArea.select();
+        document.execCommand("copy");
+    
+        // 删除临时元素
+        document.body.removeChild(tempTextArea);
+    
+        copyTip.style.display = "block";
+        setTimeout(function() {
+            copyTip.style.display = "none";
+        }, 4000); // 4秒后隐藏提示信息
+    }
+ </script>
+</body>
+</html>

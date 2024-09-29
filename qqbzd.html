@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-size: 80px; /* 调整字体大小 */
+      margin-top: 100px; /* 调整整体位置 */
+    }
+    .container {
+      text-align: center;
+      margin-top: 100px;
+      transition: margin-top 0.5s;
+    }
+    .generated-link {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 1s;
+    }
+    .generated-link.show {
+      display: block;
+    }
+    .copy-button {
+      margin-top: 10px;
+    }
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      animation: fadeOut 2s;
+    }
+
+    input[type="text"] {
+      font-size: 24px; /* 调整输入框字体大小 */
+      padding: 10px; /* 调整输入框内边距 */
+      border: 1px solid #ccc; /* 修改输入框边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      width: 80%; /* 调整输入框宽度 */
+    }
+
+    button {
+      font-size: 24px; /* 调整按钮字体大小 */
+      padding: 4px 10px; /* 调整按钮内边距 */
+      background-color: #f8f8f8; /* 修改按钮背景颜色 */
+      border: 1px solid #ccc; /* 修改按钮边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 20px; /* 在小屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 300px; /* 在小屏幕上进一步调整元素位置 */
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+      body {
+        font-size: 22px; /* 在中等屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 120px; /* 在中等屏幕上进一步调整元素位置 */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QQ音乐-ID</h1>
+    
+	    <!-- 编码复选框 -->
+    <div class="input-container">
+      <form id="encodeForm">
+        <label for="encodeCheckbox" class="label">1.（小程序写入请取消勾选）编码</label>
+        <input type="checkbox" id="encodeCheckbox" name="encodeCheckbox" checked onchange="generateUrl()">
+      </form>
+    </div>
+
+    <!-- 步骤A -->
+    <div class="input-container">
+      <label for="stepA" class="label" >2.输入分享文本</label>
+      <input type="text" id="stepA" name="stepA" class="input-box" oninput="processUrl()" placeholder="✎ 吴青峰《伤风》https://...">
+    </div>
+
+
+
+    <!-- 步骤B/C -->
+    <div class="input-container">
+      <label for="stepB" class="label">最终处理完的代码如下↓ </label>
+      <input type="text" id="stepB" name="stepB" class="input-box" oninput="generateUrl()" placeholder="⚙︎    工具自动完成复制">
+    </div>
+
+    <!-- 清除按钮 -->
+    <div class="input-container">
+      <button onclick="clearInputs()">清除</button>
+    </div>
+  </div>
+
+  <script>
+    // 步骤A：正则匹配用户文本中的手机网址
+    function processUrl() {
+      let text = document.getElementById("stepA").value;
+      let regex = /https?:\/\/[^\s]+/g;
+      let match = text.match(regex);
+      if (match && match.length > 0) {
+        let url = match[0];
+        getSongmidFromAPI(url);
+      }
+    }
+
+    // 从API获取songmid参数
+    function getSongmidFromAPI(url) {
+      let apiUrl = 'https://res.abeim.cn/api-dwz_longurl?url=' + encodeURIComponent(url);
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.code === 200) {
+            let songmid = data.long_url.match(/songmid=([0-9a-zA-Z]+)/)[1];
+            generateFinalUrl(songmid);
+          } else {
+            alert("无法获取songmid参数，请检查API返回数据");
+          }
+        })
+        .catch(error => {
+          alert("请求API失败：" + error);
+        });
+    }
+
+    // 生成最终的启动链接并自动复制
+    function generateFinalUrl(songmid) {
+      let finalParam = '{"song":[{"type":"0","songmid":"' + songmid + '"}],"action":"play"}';
+
+      // 判断复选框状态来决定是否对参数进行编码
+      let encodeCheckbox = document.getElementById("encodeCheckbox");
+      let finalUrl;
+      if (encodeCheckbox.checked) {
+        finalUrl = "qqmusic://qq.com/media/playSonglist?p=" + encodeURIComponent(finalParam);
+      } else {
+        finalUrl = "qqmusic://qq.com/media/playSonglist?p=" + finalParam;
+      }
+
+      document.getElementById("stepB").value = finalUrl;
+      document.getElementById("stepB").select();
+      document.execCommand("copy");
+      alert("已生成最终代码并复制到剪贴板！快去写入吧");
+    }
+
+    // 清除按钮：清空所有输入框的内容
+    function clearInputs() {
+      document.getElementById("stepA").value = "";
+      document.getElementById("stepB").value = "";
+    }
+  </script>
+</body>
+</html>

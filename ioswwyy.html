@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      height: 30px;
+      margin-bottom: 10px;
+      padding: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 100px;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin-right: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #3e8e41;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      display: none;
+      animation: fadeOut 2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>网易云音乐-网页</h2>
+    <input type="text" id="input" placeholder="请输入网易云打开的链接">
+    <br>
+    <button class="button" onclick="cycleButton()" id="cycle-button">生成链接</button>
+    <br>
+    <span class="success-message" id="success-message">点击复制链接</span>
+  </div>
+
+  <script>
+    var buttonIndex = 0;
+
+    function generateLink() {
+      var inputText = document.getElementById("input").value;
+      if (inputText.trim() === "") {
+        return;
+      }
+      var url = "orpheus://openurl?url=" + inputText;
+      document.getElementById("input").value = url;
+    }
+
+    function copyLink() {
+      var output = document.getElementById("input");
+      output.select();
+      document.execCommand("copy");
+      document.getElementById("success-message").style.display = "block";
+      setTimeout(function () {
+        document.getElementById("success-message").style.display = "none";
+      }, 3000);
+    }
+
+    function clearInput() {
+      document.getElementById("input").value = "";
+    }
+
+    function cycleButton() {
+      switch (buttonIndex) {
+        case 0:
+          generateLink();
+          break;
+        case 1:
+          copyLink();
+          break;
+        case 2:
+          clearInput();
+          break;
+      }
+
+      if (buttonIndex < 2) {
+        buttonIndex++;
+      } else {
+        buttonIndex = 0;
+      }
+
+      updateButton();
+    }
+
+    function updateButton() {
+      var cycleButton = document.getElementById("cycle-button");
+
+      switch (buttonIndex) {
+        case 0:
+          cycleButton.innerHTML = "生成链接";
+          break;
+        case 1:
+          cycleButton.innerHTML = "复制链接";
+          break;
+        case 2:
+          cycleButton.innerHTML = "清空输入";
+          break;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      updateButton();
+    });
+  </script>
+</body>
+</html>

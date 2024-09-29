@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>跳转测试页面</title>
+</head>
+<body>
+    <h1>跳转测试页面1</h1>
+    <form>
+        <label for="scheme-url">第一次请输入要跳转的歌曲代码:</label><br>
+        <input type="text" id="scheme-url" name="scheme-url"><br><br>
+        <input type="button" value="跳转" onclick="openSchemeUrl()">
+    </form>
+
+    <script>
+        // 读取上一次输入的 URL
+        var lastSchemeUrl = localStorage.getItem('scheme-url');
+        if (lastSchemeUrl !== null) {
+            document.getElementById("scheme-url").value = lastSchemeUrl;
+            // 自动跳转
+            location.href = lastSchemeUrl;
+        }
+
+        function openSchemeUrl() {
+            var schemeUrl = document.getElementById("scheme-url").value;
+            
+            // 保存用户输入的 URL
+            localStorage.setItem('scheme-url', schemeUrl);
+            
+            // 直接跳转
+            location.href = schemeUrl;
+        }
+    </script>
+</body>
+</html>

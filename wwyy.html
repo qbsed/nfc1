@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呢佛吃</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-size: 80px; /* 调整字体大小 */
+      margin-top: 100px; /* 调整整体位置 */
+    }
+    .container {
+      text-align: center;
+      margin-top: 100px;
+      transition: margin-top 0.5s;
+    }
+    .generated-link {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 1s;
+    }
+    .generated-link.show {
+      display: block;
+    }
+    .copy-button {
+      margin-top: 10px;
+    }
+    .success-message {
+      color: green;
+      margin-top: 10px;
+      animation: fadeOut 2s;
+    }
+
+    input[type="text"] {
+      font-size: 24px; /* 调整输入框字体大小 */
+      padding: 10px; /* 调整输入框内边距 */
+      border: 1px solid #ccc; /* 修改输入框边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      width: 80%; /* 调整输入框宽度 */
+    }
+
+    button {
+      font-size: 24px; /* 调整按钮字体大小 */
+      padding: 4px 10px; /* 调整按钮内边距 */
+      background-color: #f8f8f8; /* 修改按钮背景颜色 */
+      border: 1px solid #ccc; /* 修改按钮边框样式 */
+      border-radius: 5px; /* 圆角边框 */
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 20px; /* 在小屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 300px; /* 在小屏幕上进一步调整元素位置 */
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+      body {
+        font-size: 22px; /* 在中等屏幕上进一步调整字体大小 */
+      }
+      .container {
+        margin-top: 120px; /* 在中等屏幕上进一步调整元素位置 */
+      }
+    }
+  </style>
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('click', function(event) {
+        if (event.target.id !== 'inputBox' && event.target.id !== 'outputBox') {
+          matchUrl();
+        }
+      });
+    });
+
+    function matchUrl() {
+      let text = document.getElementById("inputBox").value;
+      let regex = /https?:\/\/[^\s]+/g;
+      let match = text.match(regex);
+      if (match && match.length > 0) {
+        let url = "orpheus://openurl?url=" + match[0];
+        document.getElementById("outputBox").value = url;
+        document.querySelector('.container').style.marginTop = '20px';
+        document.getElementById('generated-link').classList.add('show');
+        document.getElementById('success-message').innerHTML = "链接已自动复制，请直接使用";
+        document.getElementById('success-message').style.display = 'block';
+        copyOutput(url);
+
+        // 自动隐藏成功提示
+        setTimeout(function() {
+          document.getElementById('success-message').style.display = 'none';
+        }, 3000);
+      } else {
+        alert("未找到合法的链接！");
+      }
+    }
+
+    function copyOutput(outputLink) {
+      var tempInput = document.createElement('input');
+      tempInput.value = outputLink;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+    }
+
+    function clearInput() {
+      document.getElementById('inputBox').value = '';
+      document.getElementById('outputBox').value = '';
+      document.querySelector('.container').style.marginTop = '200px';
+      document.getElementById('generated-link').classList.remove('show');
+      document.getElementById('success-message').style.display = 'none';
+    }
+  </script>
+</head>
+<body>
+<div class="container">
+  <h2>网易云音乐-网页</h2>
+  
+  <input type="text" id="inputBox" placeholder="请输入要跳转打开的网页">
+  <br>
+  <button onclick="clearInput()">清空</button>
+</div>
+
+<div id="generated-link" class="generated-link">
+  <p>生成的链接为：</p>
+  <input type="text" id="outputBox" readonly>
+  <br>
+  <button class="copy-button" onclick="copyOutput(document.getElementById('outputBox').value)">手动复制</button>
+  <p id="success-message" class="success-message" style="display: none;"></p>
+</div>
+</body>
+</html>
